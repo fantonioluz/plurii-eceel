@@ -20,6 +20,14 @@ cursor.execute("""
     SET categoria = 'Salário dos Funcionários'
     WHERE descricao LIKE '%PRO-LABORE%'
 """)
+
+conn.commit()
+cursor.execute("""
+    UPDATE bank_transactions
+    SET categoria = 'Salário dos Funcionários'
+    WHERE descricao LIKE '%SALARIO%'
+""")
+
 conn.commit()
 conn.close()
 
