@@ -15,7 +15,7 @@ def calculate_salary_expenses(data):
     """
     data['data'] = pd.to_datetime(data['data'])
     data['month'] = data['data'].dt.to_period('M').astype(str)
-    salary_data = data[data['categoria'] == 'Salário dos Funcionários']
+    salary_data = data[data['subconta'] == 'Salário']
     monthly_expenses = (
         salary_data.groupby('month')['debito']
         .sum()

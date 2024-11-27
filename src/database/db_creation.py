@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS bank_transactions (
     debito REAL DEFAULT 0,
     saldo REAL DEFAULT 0,
     banco TEXT NOT NULL,
+    conta TEXT,
+    subconta TEXT,
     file_path TEXT
 );
 """
@@ -42,7 +44,7 @@ df['saldo'] = pd.to_numeric(df['SALDO'], errors='coerce')  # Garante que o saldo
 df = df.rename(columns=str.lower)  # Normaliza os nomes das colunas
 
 # Popular o banco de dados
-df[['data', 'descricao', 'documento', 'credito', 'debito', 'saldo', 'banco', 'file_path']].to_sql(
+df[['data', 'descricao', 'documento', 'credito', 'debito', 'saldo', 'banco','conta','subconta', 'file_path']].to_sql(
     'bank_transactions', conn, if_exists='append', index=False
 )
 
