@@ -36,3 +36,33 @@ def calculate_monthly_profit(data):
         .rename(columns={'month': 'Mês'})
     )
     return profit_data
+
+
+def analyze_bank_transactions(data, start_date, end_date):
+    """
+    Filtra e agrega transações por banco e tipo (entradas/saídas).
+    """
+    # Converter coluna 'data' para datetime
+    data['data'] = pd.to_datetime(data['data'])
+    
+    # Filtrar pelo intervalo de datas
+    filtered_data = data[(data['data'] >= start_date) & (data['data'] <= end_date)]
+    
+    # Agregar entradas e saídas por banco
+    bank_analysis = filtered_data.melt(
+        id_vars=['banco'], 
+        value_vars=['credito', 'debito'], 
+        var_name='Tipo', 
+        value_name='Valor'
+    ).groupby(['banco', 'Tipo'], as_index=False)['Valor'].sum()
+    
+    return bank_analysis
+
+def analyze_for_bank(banco_data):
+    banco_analysis = banco_data.melt(
+        id_vars=['data'], 
+        value_vars=['credito', 'debito'], 
+        var_name='Tipo', 
+        value_name='Valor'
+    ).groupby(['data', 'Tipo'], as_index=False)['Valor'].sum()
+    return banco_analysis

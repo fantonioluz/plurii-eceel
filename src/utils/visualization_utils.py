@@ -27,3 +27,34 @@ def create_profit_chart(monthly_profit):
         height=400
         
     )
+
+
+def create_bank_analysis_chart(bank_data):
+    """
+    Cria um gráfico de barras para entradas e saídas por banco.
+    """
+    chart = alt.Chart(bank_data).mark_bar().encode(
+        x=alt.X('banco:O', title='Banco'),
+        y=alt.Y('Valor:Q', title='Valor (R$)'),
+        color='Tipo:N',
+        tooltip=['banco', 'Tipo', 'Valor']
+    ).properties(
+        width=800,
+        height=400,
+        title="Entradas e Saídas por Banco"
+    )
+    return chart
+
+def create_for_one_bank_chart(banco_analysis, banco_selecionado):
+    banco_analysis['Mês'] = banco_analysis['data'].dt.to_period('M').astype(str)  # Agrupar por mês
+    banco_chart = alt.Chart(banco_analysis).mark_bar().encode(
+        x=alt.X('Mês:O', title='Mês', sort=None),
+        y=alt.Y('Valor:Q', title='Valor (R$)'),
+        color='Tipo:N',
+        tooltip=['Mês', 'Tipo', 'Valor']
+    ).properties(
+        width=800,
+        height=400,
+        title=f"Entradas e Saídas Mensais - {banco_selecionado}"
+    )
+    return banco_chart
