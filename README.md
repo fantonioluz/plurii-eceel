@@ -1,5 +1,3 @@
-
-```markdown
 # **FinancePro Dashboard**
 
 Uma aplicação interativa construída com **Streamlit** para análise e visualização de dados financeiros, desenvolvida para uma assistência técnica de aparelhos de refrigeração, linha branca, e outros serviços. O aplicativo permite aos usuários monitorar transações, identificar fornecedores mais rentáveis, e realizar análises financeiras detalhadas.
