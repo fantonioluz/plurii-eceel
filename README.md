@@ -1,6 +1,3 @@
-Aqui está o README atualizado, considerando a estrutura corrigida do projeto e o passo adicional para rodar o script `db_creation.py` antes de iniciar a aplicação:
-
----
 
 ```markdown
 # **FinancePro Dashboard**
