@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 from db_utils import load_data_from_db
 from analysis_utils import (
+    prepare_yearly_data_for_line_chart,
+    prepare_monthly_data_for_line_chart,
+    get_monthly_summary,
+    get_yearly_summary,
     transform_data_for_display_in_table,
     convert_date_column,
     add_month_and_year_columns,
@@ -13,12 +17,22 @@ from analysis_utils import (
     prepare_profit_data,
     prepare_yearly_account_data,
     prepare_yearly_subaccount_data,
-    calculate_total,
-    create_weekly_chart,
-    create_monthly_chart,
-    create_yearly_chart,
+    comparar_calcular_total,
 )
-from visualization_utils import create_account_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
+from visualization_utils import (
+    create_yearly_line_chart,
+    create_monthly_line_chart,
+    create_monthly_summary_chart,
+    create_yearly_summary_chart,
+    create_credit_debit_chart,
+    create_salary_chart,
+    create_profit_chart,
+    create_yearly_account_chart,
+    create_yearly_subaccount_chart,
+    comparar_semanal,
+    comparar_mensal,
+    comparar_anual,
+)
 from streamlit_option_menu import option_menu
 
 st.markdown(
@@ -30,7 +44,7 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 # Inicializar o estado da página
@@ -42,9 +56,14 @@ with st.sidebar:
     selected = option_menu(
         "FinancePro",
         ["Início", "Dashboard Geral", "Análise por Banco", "Histórico de Transações"],
-        icons=['house', 'bar-chart-line', 'graph-up', 'clock-history'],
+        icons=["house", "bar-chart-line", "graph-up", "clock-history"],
         menu_icon="cast",
-        default_index=["Início", "Dashboard Geral", "Análise por Banco", "Histórico de Transações"].index(st.session_state.selected_page)
+        default_index=[
+            "Início",
+            "Dashboard Geral",
+            "Análise por Banco",
+            "Histórico de Transações",
+        ].index(st.session_state.selected_page),
     )
 
 # Atualizar a página com base no menu selecionado
@@ -56,19 +75,23 @@ if st.session_state.selected_page == "Início":
     # Cabeçalho principal
     st.title("ECEEL - TEC")
     st.markdown("### Olá, Mª Helena!")
-    st.write("Seja bem-vinda à sua área exclusiva de organização financeira, explore e impulsione seu negócio.")
-    
+    st.write(
+        "Seja bem-vinda à sua área exclusiva de organização financeira, explore e impulsione seu negócio."
+    )
+
     # Imagem da usuária
     col1, col2 = st.columns([1, 3])
     with col1:
-        st.image("src/images/Mask group.png", width=150, caption="Gestora")  # Ajuste o caminho, se necessário
+        st.image(
+            "src/images/Mask group.png", width=150, caption="Gestora"
+        )  # Ajuste o caminho, se necessário
     with col2:
         st.write("### Mª Helena de Souza")
         st.write("**Status:** Nenhuma notificação no momento")
-    
+
     # Notificações
     st.info("🔔 Não há nenhuma notificação no momento.")
-    
+
     # Botões de navegação
     st.write("### Ações rápidas")
     col1, col2 = st.columns(2)
@@ -123,14 +146,24 @@ if st.session_state.selected_page == "Dashboard Geral":
 
     # Gráfico de total de débito e crédito por ano e subconta para 'Despesa com pessoal'
     st.subheader("Total de Débito e Crédito por Ano e Subconta (Despesa com pessoal)")
-    yearly_subaccount_data_pessoal = prepare_yearly_subaccount_data(data, 'Despesa com pessoal')
-    yearly_subaccount_chart_pessoal = create_yearly_subaccount_chart(yearly_subaccount_data_pessoal, 'Despesa com pessoal')
+    yearly_subaccount_data_pessoal = prepare_yearly_subaccount_data(
+        data, "Despesa com pessoal"
+    )
+    yearly_subaccount_chart_pessoal = create_yearly_subaccount_chart(
+        yearly_subaccount_data_pessoal, "Despesa com pessoal"
+    )
     st.altair_chart(yearly_subaccount_chart_pessoal)
 
     # Gráfico de total de débito e crédito por ano e subconta para 'Despesas administrativas'
-    st.subheader("Total de Débito e Crédito por Ano e Subconta (Despesas administrativas)")
-    yearly_subaccount_data_administrativas = prepare_yearly_subaccount_data(data, 'Despesas administrativas')
-    yearly_subaccount_chart_administrativas = create_yearly_subaccount_chart(yearly_subaccount_data_administrativas, 'Despesas administrativas')
+    st.subheader(
+        "Total de Débito e Crédito por Ano e Subconta (Despesas administrativas)"
+    )
+    yearly_subaccount_data_administrativas = prepare_yearly_subaccount_data(
+        data, "Despesas administrativas"
+    )
+    yearly_subaccount_chart_administrativas = create_yearly_subaccount_chart(
+        yearly_subaccount_data_administrativas, "Despesas administrativas"
+    )
     st.altair_chart(yearly_subaccount_chart_administrativas)
 
     # Comparação de ganhos e gastos
@@ -148,17 +181,20 @@ if st.session_state.selected_page == "Dashboard Geral":
         )
     else:
         num_periods = st.slider(
-            "Quantos períodos você deseja visualizar?", min_value=1, max_value=12, value=3
+            "Quantos períodos você deseja visualizar?",
+            min_value=1,
+            max_value=12,
+            value=3,
         )
 
     # Calcular totais
-    totais_semana, totais_mes, totais_ano = calculate_total(data)
+    totais_semana, totais_mes, totais_ano = comparar_calcular_total(data)
 
     # Mostrar os dados e gráficos com base na seleção
     if period_type == "Semanal":
         st.markdown(f"#### Últimas {num_periods} semanas")
         weekly_data = totais_semana.head(num_periods)
-        fig_semana = create_weekly_chart(weekly_data)
+        fig_semana = comparar_semanal(weekly_data)
         st.plotly_chart(fig_semana)
         st.write("Dados detalhados das semanas selecionadas:")
         st.dataframe(weekly_data)
@@ -166,7 +202,7 @@ if st.session_state.selected_page == "Dashboard Geral":
     elif period_type == "Mensal":
         st.markdown(f"#### Últimos {num_periods} meses")
         monthly_data = totais_mes.head(num_periods)
-        fig_mes = create_monthly_chart(monthly_data)
+        fig_mes = comparar_mensal(monthly_data)
         st.plotly_chart(fig_mes)
         st.write("Dados detalhados dos meses selecionados:")
         st.dataframe(monthly_data)
@@ -174,15 +210,91 @@ if st.session_state.selected_page == "Dashboard Geral":
     elif period_type == "Anual":
         st.markdown(f"#### Últimos {num_periods} anos")
         yearly_data = totais_ano.head(num_periods)
-        fig_ano = create_yearly_chart(yearly_data)
+        fig_ano = comparar_anual(yearly_data)
         st.plotly_chart(fig_ano)
         st.write("Dados detalhados dos anos selecionados:")
         st.dataframe(yearly_data)
 
 # Página "Análise por Banco"
 if st.session_state.selected_page == "Análise por Banco":
-    st.title("Análise por Banco")
-    st.write("Aqui será o conteúdo da Análise por Banco.")
+    st.title("Análise por Banco e Ano")
+    data = load_data_from_db()
+    data = convert_date_column(data, "data")
+    data = add_month_and_year_columns(data, "data")
+
+    # Filtros
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        bancos_disponiveis = ["Todos os Bancos"] + list(data["banco"].unique())
+        selected_bank = st.selectbox("Selecione o Banco", bancos_disponiveis)
+
+    with col2:
+        anos_disponiveis = ["Todos os Anos"] + sorted(data["data"].dt.year.unique())
+        selected_year = st.selectbox("Selecione o Ano", anos_disponiveis)
+
+    with col3:
+        chart_type = st.radio("Selecione o Tipo de Gráfico", ["Barra", "Linha"])
+
+    if selected_bank != "Todos os Bancos":
+        data = data[data["banco"] == selected_bank]
+
+    if selected_year != "Todos os Anos":
+        data = data[data["data"].dt.year == selected_year]
+
+    data["ano"] = data["data"].dt.year
+    if chart_type == "Barra":
+        credit_summary = get_yearly_summary(data, "credito")
+        debit_summary = get_yearly_summary(data, "debito")
+        credit_chart = create_yearly_summary_chart(
+            credit_summary, "credito", title="Resumo Anual de Crédito"
+        )
+        debit_chart = create_yearly_summary_chart(
+            debit_summary, "debito", title="Resumo Anual de Débito"
+        )
+    else:
+        credit_summary = prepare_yearly_data_for_line_chart(data, "credito")
+        debit_summary = prepare_yearly_data_for_line_chart(data, "debito")
+        credit_chart = create_yearly_line_chart(
+            credit_summary, "credito", title="Crédito Anual por Banco"
+        )
+        debit_chart = create_yearly_line_chart(
+            debit_summary, "debito", title="Débito Anual por Banco"
+        )
+
+    st.subheader("Gráficos de Crédito e Débito")
+    col4, col5 = st.columns(2)
+    with col4:
+        st.altair_chart(credit_chart, use_container_width=True)
+    with col5:
+        st.altair_chart(debit_chart, use_container_width=True)
+
+    if chart_type == "Barra":
+        credit_summary_month = get_monthly_summary(data, "credito")
+        debit_summary_month = get_monthly_summary(data, "debito")
+        credit_chart_month = create_monthly_summary_chart(
+            credit_summary_month, "credito", title="Resumo Mensal de Crédito"
+        )
+        debit_chart_month = create_monthly_summary_chart(
+            debit_summary_month, "debito", title="Resumo Mensal de Débito"
+        )
+    else:
+        # gráficos de linha
+        credit_summary_month = prepare_monthly_data_for_line_chart(data, "credito")
+        debit_summary_month = prepare_monthly_data_for_line_chart(data, "debito")
+        credit_chart_month = create_monthly_line_chart(
+            credit_summary_month, "credito", title="Crédito Mensal por Banco"
+        )
+        debit_chart_month = create_monthly_line_chart(
+            debit_summary_month, "debito", title="Débito Mensal por Banco"
+        )
+
+    st.subheader("Gráficos de Crédito e Débito por Mês")
+    col6, col7 = st.columns(2)
+    with col6:
+        st.altair_chart(credit_chart_month, use_container_width=True)
+    with col7:
+        st.altair_chart(debit_chart_month, use_container_width=True)
+
 
 # Página "Histórico de Transações"
 if st.session_state.selected_page == "Histórico de Transações":
@@ -192,22 +304,25 @@ if st.session_state.selected_page == "Histórico de Transações":
     data = convert_date_column(data, "data")
 
     col1, col2, col6, col7, col8 = st.columns(5)
-    with col1: 
-        selected_month = st.selectbox("Selecione o mês", ["Ano Todo"] + [f"{i:02d}" for i in range(1, 13)])
+    with col1:
+        selected_month = st.selectbox(
+            "Selecione o mês", ["Ano Todo"] + [f"{i:02d}" for i in range(1, 13)]
+        )
     with col2:
         selected_year = st.number_input(
             "Digite o ano",
             min_value=2000,
             max_value=int(pd.Timestamp.now().year),
             value=int(pd.Timestamp.now().year),
-            step=1
+            step=1,
         )
 
     if selected_month == "Ano Todo":
         filtered_data = data[data["data"].dt.year == selected_year]
     else:
         filtered_data = data[
-            (data["data"].dt.month == int(selected_month)) & (data["data"].dt.year == selected_year)
+            (data["data"].dt.month == int(selected_month))
+            & (data["data"].dt.year == selected_year)
         ]
     transformed_data = transform_data_for_display_in_table(filtered_data)
 
@@ -215,25 +330,45 @@ if st.session_state.selected_page == "Histórico de Transações":
         st.warning("Nenhum dado encontrado para o período selecionado.")
     else:
         # Filtros
-        with col6: 
+        with col6:
             unique_banks = transformed_data["banco"].unique()
-            selected_bank = st.selectbox("Selecione o Banco", options=["Todos"] + list(unique_banks))
+            selected_bank = st.selectbox(
+                "Selecione o Banco", options=["Todos"] + list(unique_banks)
+            )
             if selected_bank != "Todos":
-                transformed_data = transformed_data[transformed_data["banco"] == selected_bank]
-        with col7: 
+                transformed_data = transformed_data[
+                    transformed_data["banco"] == selected_bank
+                ]
+        with col7:
             unique_subaccounts = transformed_data["subconta"].unique()
-            selected_subaccount = st.selectbox("Selecione a Subconta", options=["Todas"] + list(unique_subaccounts))
+            selected_subaccount = st.selectbox(
+                "Selecione a Subconta", options=["Todas"] + list(unique_subaccounts)
+            )
             if selected_subaccount != "Todas":
-                transformed_data = transformed_data[transformed_data["subconta"] == selected_subaccount]
+                transformed_data = transformed_data[
+                    transformed_data["subconta"] == selected_subaccount
+                ]
         with col8:
             description_filter = st.text_input("Filtrar por Descrição")
             if description_filter:
-                transformed_data = transformed_data[transformed_data["descricao"].str.contains(description_filter, case=False, na=False)]
+                transformed_data = transformed_data[
+                    transformed_data["descricao"].str.contains(
+                        description_filter, case=False, na=False
+                    )
+                ]
 
         if transformed_data.empty:
             st.warning("Nenhum dado encontrado com os filtros aplicados.")
         else:
-            columns_to_display = ["data", "descricao", "documento", "valor",  "banco", "conta", "subconta"]
+            columns_to_display = [
+                "data",
+                "descricao",
+                "documento",
+                "valor",
+                "banco",
+                "conta",
+                "subconta",
+            ]
             st.dataframe(transformed_data[columns_to_display].reset_index(drop=True))
 
         total_debit = transformed_data["debito"].sum()
@@ -241,7 +376,6 @@ if st.session_state.selected_page == "Histórico de Transações":
         total_profit = total_credit - total_debit
 
         col3, col4, col5 = st.columns(3)
-
         with col3:
             st.markdown(
                 f"""
@@ -258,7 +392,7 @@ if st.session_state.selected_page == "Histórico de Transações":
                 Total Crédito: R$ {total_credit:,.2f}
                 </div>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
 
         with col4:
@@ -277,9 +411,9 @@ if st.session_state.selected_page == "Histórico de Transações":
                 Total Débito: R$ {total_debit:,.2f}
                 </div>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
-        with col5: 
+        with col5:
             st.markdown(
                 f"""
                 <div style="
@@ -295,5 +429,5 @@ if st.session_state.selected_page == "Histórico de Transações":
                 Total Lucro: R$ {total_profit:,.2f}
                 </div>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
