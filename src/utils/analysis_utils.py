@@ -298,6 +298,9 @@ def analyze_supplier_profitability(data):
     relevant_brands = ['Panasonic', 'Elgin', 'Spring', 'Fresnomaq']
     filtered_data = service_data[service_data['subconta'].isin(relevant_brands)]
     
+    # Substituir "Spring" por "Springer" apenas para exibição
+    filtered_data['subconta'] = filtered_data['subconta'].replace({'Spring': 'Springer'})
+    
     # Garantir que as colunas 'credito' e 'debito' sejam numéricas
     filtered_data['credito'] = pd.to_numeric(filtered_data['credito'], errors='coerce').fillna(0)
     filtered_data['debito'] = pd.to_numeric(filtered_data['debito'], errors='coerce').fillna(0)
@@ -320,6 +323,7 @@ def analyze_supplier_profitability(data):
     profitability = profitability.sort_values(by='Rentabilidade', ascending=False)
     
     return profitability
+
 
 
 

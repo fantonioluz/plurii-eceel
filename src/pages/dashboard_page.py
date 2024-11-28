@@ -90,23 +90,18 @@ else:
             weekly_data = totais_semana.head(num_periods)
             chart_semanal = comparar_semanal(weekly_data)
             st.altair_chart(chart_semanal, use_container_width=True)
-            st.write("Dados detalhados das semanas selecionadas:")
-            st.dataframe(weekly_data)
 
         elif period_type == "Mensal":
             st.markdown(f"#### Últimos {num_periods} meses")
             monthly_data = totais_mes.head(num_periods)
             chart_mensal = comparar_mensal(monthly_data)
             st.altair_chart(chart_mensal, use_container_width=True)
-            st.write("Dados detalhados dos meses selecionados:")
-            st.dataframe(monthly_data)
 
         elif period_type == "Anual":
             st.markdown(f"#### Últimos {num_periods} anos")
             yearly_data = totais_ano.head(num_periods)
             chart_anual = comparar_anual(yearly_data)
             st.altair_chart(chart_anual, use_container_width=True)
-            st.write("Dados detalhados dos anos selecionados:")
 
         # Aba: Entradas e Saídas
         with tab2:
