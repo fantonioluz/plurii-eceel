@@ -1,10 +1,13 @@
-Aqui está um exemplo de README para o repositório da sua aplicação:
+Aqui está o README atualizado, considerando a estrutura corrigida do projeto e o passo adicional para rodar o script `db_creation.py` antes de iniciar a aplicação:
 
 ---
 
+```markdown
 # **FinancePro Dashboard**
 
 Uma aplicação interativa construída com **Streamlit** para análise e visualização de dados financeiros, desenvolvida para uma assistência técnica de aparelhos de refrigeração, linha branca, e outros serviços. O aplicativo permite aos usuários monitorar transações, identificar fornecedores mais rentáveis, e realizar análises financeiras detalhadas.
+
+---
 
 ## **Funcionalidades**
 
@@ -30,8 +33,7 @@ Certifique-se de que você possui os seguintes softwares instalados:
 
 ### 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/financepro-dashboard.git
-cd financepro-dashboard
+git clone https://github.com/seu-usuario/plurii-eceel.git
 ```
 
 ### 2. Crie um ambiente virtual (opcional, mas recomendado):
@@ -47,26 +49,37 @@ pip install -r requirements.txt
 
 ---
 
-## **Como rodar a aplicação**
+## **Como configurar e rodar a aplicação**
 
-1. Certifique-se de que está no diretório do projeto:
-   ```bash
-   cd financepro-dashboard
-   ```
+### **1. Configuração inicial**
+Antes de rodar a aplicação, é necessário criar e popular o banco de dados. Para isso, execute o seguinte comando no terminal:
+```bash
+python src/utils/db_creation.py
+```
 
-2. Execute a aplicação com o comando:
-   ```bash
-   streamlit run src/app.py
-   ```
+Esse script criará o banco de dados SQLite (`bank_data_csv.db`) com base nos arquivos de dados localizados no diretório `data/`.
 
-3. Acesse o aplicativo no navegador:
-   - O Streamlit exibirá um link no terminal, geralmente algo como `http://localhost:8501`.
+### **2. Rodar a aplicação**
+Após a criação do banco de dados, inicie a aplicação com o seguinte comando:
+```bash
+streamlit run src/app.py
+```
+
+### **3. Acesse a aplicação**
+Abra o navegador e acesse o link fornecido pelo Streamlit, geralmente `http://localhost:8501`.
 
 ---
 
 ## **Estrutura do projeto**
 
 ```plaintext
+├── .streamlit/
+│   ├── config.toml          # Configurações do Streamlit
+├── data/
+│   ├── processed/           # Dados processados
+│   ├── raw/                 # Dados brutos
+├── notebook/
+│   ├── data_processing.ipynb # Notebook de processamento de dados
 ├── src/
 │   ├── app.py                # Arquivo principal da aplicação
 │   ├── pages/                # Páginas do Streamlit (multiplas abas)
@@ -75,13 +88,15 @@ pip install -r requirements.txt
 │   │   ├── bank_page.py      # Análise por banco
 │   │   ├── historic_page.py  # Histórico de transações
 │   ├── utils/                # Funções de utilidade
+│   │   ├── db_creation.py    # Script para criar/popular o banco de dados
 │   │   ├── db_utils.py       # Gerenciamento de banco de dados
 │   │   ├── analysis_utils.py # Funções de análise de dados
 │   │   ├── visualization_utils.py # Funções para gráficos
-│   ├── database/             # Base de dados e arquivos relacionados
+│   ├── database/             # Banco de dados SQLite
 │   ├── images/               # Imagens usadas na aplicação
-├── requirements.txt          # Lista de dependências do projeto
+├── .gitignore                # Arquivos ignorados pelo Git
 ├── README.md                 # Documentação do projeto
+├── requirements.txt          # Lista de dependências do projeto
 ```
 
 ---
@@ -120,5 +135,7 @@ Se você deseja contribuir com melhorias no projeto:
 ## **Licença**
 
 Este projeto está sob a licença [MIT](LICENSE). Sinta-se à vontade para utilizá-lo e modificá-lo conforme necessário.
+```
 
 ---
+
