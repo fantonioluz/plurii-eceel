@@ -84,3 +84,39 @@ def prepare_yearly_subaccount_data(data, conta):
     filtered_data = data[data['conta'] == conta]
     grouped = filtered_data.groupby(['year', 'subconta'])[['credito', 'debito']].sum().reset_index()
     return grouped
+
+def convert_date_column(data, column_name):
+    """
+    Converte uma coluna para o tipo datetime.
+    Returns:
+        pd.DataFrame: DataFrame com a coluna convertida.
+    """
+    data[column_name] = pd.to_datetime(data[column_name])
+    return data
+
+def add_month_and_year_columns(data, date_column):
+    """
+    Adiciona colunas de mês e ano ao DataFrame com base em uma coluna de data.
+    Returns:
+        pd.DataFrame: DataFrame com colunas de mês e ano.
+    """
+    data['month'] = data[date_column].dt.month
+    data['year'] = data[date_column].dt.year
+    return data
+
+def transform_data_for_display_in_table(data):
+    """
+    Transforma o DataFrame para exibição:
+    - Remove a hora da coluna de data, exibindo apenas YYYY-MM-DD.
+    - Consolida as colunas 'credito' e 'debito' em uma única coluna 'valor'.
+      Débitos são representados como valores negativos.
+    """
+    data["data"] = pd.to_datetime(data["data"])
+
+    data["data"] = data["data"].dt.date
+
+    data["valor"] = data["credito"] - data["debito"]
+
+    data = data.sort_values(by="data")
+
+    return data[["data", "descricao", "documento", "debito", "credito","valor", "saldo", "banco", "conta", "subconta"]]
