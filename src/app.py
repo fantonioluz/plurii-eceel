@@ -175,17 +175,12 @@ if st.session_state.selected_page == "Dashboard Geral":
     )
 
     # Controlar o número de períodos a exibir
-    if period_type == "Anual":
-        num_periods = st.slider(
-            "Quantos anos você deseja visualizar?", min_value=1, max_value=3, value=3
-        )
-    else:
-        num_periods = st.slider(
-            "Quantos períodos você deseja visualizar?",
-            min_value=1,
-            max_value=12,
-            value=3,
-        )
+    num_periods = st.slider(
+        "Quantos períodos você deseja visualizar?",
+        min_value=1,
+        max_value=3,
+        value=3
+    )
 
     # Calcular totais
     totais_semana, totais_mes, totais_ano = comparar_calcular_total(data)
@@ -194,24 +189,24 @@ if st.session_state.selected_page == "Dashboard Geral":
     if period_type == "Semanal":
         st.markdown(f"#### Últimas {num_periods} semanas")
         weekly_data = totais_semana.head(num_periods)
-        fig_semana = comparar_semanal(weekly_data)
-        st.plotly_chart(fig_semana)
+        chart_semanal = comparar_semanal(weekly_data)
+        st.altair_chart(chart_semanal, use_container_width=True)
         st.write("Dados detalhados das semanas selecionadas:")
         st.dataframe(weekly_data)
 
     elif period_type == "Mensal":
         st.markdown(f"#### Últimos {num_periods} meses")
         monthly_data = totais_mes.head(num_periods)
-        fig_mes = comparar_mensal(monthly_data)
-        st.plotly_chart(fig_mes)
+        chart_mensal = comparar_mensal(monthly_data)
+        st.altair_chart(chart_mensal, use_container_width=True)
         st.write("Dados detalhados dos meses selecionados:")
         st.dataframe(monthly_data)
 
     elif period_type == "Anual":
         st.markdown(f"#### Últimos {num_periods} anos")
         yearly_data = totais_ano.head(num_periods)
-        fig_ano = comparar_anual(yearly_data)
-        st.plotly_chart(fig_ano)
+        chart_anual = comparar_anual(yearly_data)
+        st.altair_chart(chart_anual, use_container_width=True)
         st.write("Dados detalhados dos anos selecionados:")
         st.dataframe(yearly_data)
 

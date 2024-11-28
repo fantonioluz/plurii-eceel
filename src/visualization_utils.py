@@ -1,5 +1,4 @@
 import altair as alt
-import plotly.express as px
 
 
 def create_salary_chart(salary_expenses):
@@ -288,42 +287,120 @@ def comparar_semanal(weekly_data):
     """
     - Cria um gráfico de barras para comparação de crédito, débito e saldo semanal.
     - weekly_data (pd.DataFrame): Dados semanais com crédito, débito e saldo.
-    - Gráfico de barras semanal.
+    - Retorna o gráfico de barras semanal com cores personalizadas.
     """
-    fig = px.bar(
-        weekly_data,
-        x="Semana",
-        y=["credito", "debito", "saldo"],
-        title="Ganhos e Gastos por Semana",
+    # Reestruturar os dados para o formato longo (long format)
+    weekly_data = weekly_data.melt(
+        id_vars="Semana",
+        value_vars=["credito", "debito", "saldo"],
+        var_name="Categoria",
+        value_name="Valor",
     )
-    return fig
+
+    # Definir cores personalizadas
+    cores = {
+        "saldo": "#007BFF",
+        "debito": "#DC3545",
+        "credito": "#28A745",
+    }
+
+    chart = (
+        alt.Chart(weekly_data)
+        .mark_bar()
+        .encode(
+            x=alt.X("Semana:N", title="Semana"),
+            y=alt.Y("Valor:Q", title="Valor (R$)"),
+            color=alt.Color(
+                "Categoria:N",
+                scale=alt.Scale(
+                    domain=["saldo", "debito", "credito"], range=list(cores.values())
+                ),
+                legend=alt.Legend(title="Categoria"),
+            ),
+            tooltip=["Semana", "Categoria", "Valor"],
+        )
+        .properties(title="Ganhos e Gastos por Semana", width=600, height=400)
+    )
+    return chart
 
 
 def comparar_mensal(monthly_data):
     """
     - Cria um gráfico de barras para comparação de crédito, débito e saldo mensal.
     - monthly_data (pd.DataFrame): Dados mensais com crédito, débito e saldo.
-    - Gráfico de barras mensal.
+    - Retorna o gráfico de barras mensal com cores personalizadas.
     """
-    fig = px.bar(
-        monthly_data,
-        x="Mês",
-        y=["credito", "debito", "saldo"],
-        title="Ganhos e Gastos por Mês",
+    # Reestruturar os dados para o formato longo (long format)
+    monthly_data = monthly_data.melt(
+        id_vars="Mês",
+        value_vars=["credito", "debito", "saldo"],
+        var_name="Categoria",
+        value_name="Valor",
     )
-    return fig
+
+    # Definir cores personalizadas
+    cores = {
+        "saldo": "#007BFF",
+        "debito": "#DC3545",
+        "credito": "#28A745",
+    }
+
+    chart = (
+        alt.Chart(monthly_data)
+        .mark_bar()
+        .encode(
+            x=alt.X("Mês:N", title="Mês"),
+            y=alt.Y("Valor:Q", title="Valor (R$)"),
+            color=alt.Color(
+                "Categoria:N",
+                scale=alt.Scale(
+                    domain=["saldo", "debito", "credito"], range=list(cores.values())
+                ),
+                legend=alt.Legend(title="Categoria"),
+            ),
+            tooltip=["Mês", "Categoria", "Valor"],
+        )
+        .properties(title="Ganhos e Gastos por Mês", width=600, height=400)
+    )
+    return chart
 
 
 def comparar_anual(yearly_data):
     """
     - Cria um gráfico de barras para comparação de crédito, débito e saldo anual.
     - yearly_data (pd.DataFrame): Dados anuais com crédito, débito e saldo.
-    - Gráfico de barras anual.
+    - Retorna o gráfico de barras anual com cores personalizadas.
     """
-    fig = px.bar(
-        yearly_data,
-        x="Ano",
-        y=["credito", "debito", "saldo"],
-        title="Ganhos e Gastos por Ano",
+    # Reestruturar os dados para o formato longo (long format)
+    yearly_data = yearly_data.melt(
+        id_vars="Ano",
+        value_vars=["credito", "debito", "saldo"],
+        var_name="Categoria",
+        value_name="Valor",
     )
-    return fig
+
+    # Definir cores personalizadas
+    cores = {
+        "saldo": "#007BFF",
+        "debito": "#DC3545",
+        "credito": "#28A745",
+    }
+
+    chart = (
+        alt.Chart(yearly_data)
+        .mark_bar()
+        .encode(
+            x=alt.X("Ano:N", title="Ano"),
+            y=alt.Y("Valor:Q", title="Valor (R$)"),
+            color=alt.Color(
+                "Categoria:N",
+                scale=alt.Scale(
+                    domain=["saldo", "debito", "credito"], range=list(cores.values())
+                ),
+                legend=alt.Legend(title="Categoria"),
+            ),
+            tooltip=["Ano", "Categoria", "Valor"],
+        )
+        .properties(title="Ganhos e Gastos por Ano", width=600, height=400)
+    )
+    return chart
