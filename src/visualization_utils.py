@@ -129,4 +129,27 @@ def create_yearly_subaccount_chart(grouped, conta):
 
     return chart
 
+def create_yearly_summary_chart(yearly_data, value_column, title="Resumo Anual"):
+    """
+    Cria um gráfico de barras ou linhas para resumir valores por ano.
+    """
+    chart = alt.Chart(yearly_data).mark_bar().encode(
+        x=alt.X("ano:O", title="Ano"),
+        y=alt.Y(f"{value_column}:Q", title="Total (R$)", axis=alt.Axis(format="~s")),
+        tooltip=[
+            alt.Tooltip("ano:O", title="Ano"),
+            alt.Tooltip(f"{value_column}:Q", title="Total", format=".2f")
+        ]
+    ).properties(
+        title=title,
+        width=800,
+        height=400
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_title(
+        fontSize=16
+    )
+
+    return chart
 

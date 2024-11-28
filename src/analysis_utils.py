@@ -100,8 +100,8 @@ def add_month_and_year_columns(data, date_column):
     Returns:
         pd.DataFrame: DataFrame com colunas de mês e ano.
     """
-    data['month'] = data[date_column].dt.month
-    data['year'] = data[date_column].dt.year
+    data['mes'] = data[date_column].dt.month
+    data['ano'] = data[date_column].dt.year
     return data
 
 def transform_data_for_display_in_table(data):
@@ -120,3 +120,14 @@ def transform_data_for_display_in_table(data):
     data = data.sort_values(by="data")
 
     return data[["data", "descricao", "documento", "debito", "credito","valor", "saldo", "banco", "conta", "subconta"]]
+
+def get_yearly_summary(data, value_column):
+    """
+    Calcula o resumo anual de um valor especificado.
+    """
+
+    if "ano" not in data.columns:
+        data["ano"] = data["ano"].dt.year
+    yearly_summary = data.groupby("ano")[value_column].sum().reset_index()
+
+    return yearly_summary

@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 from db_utils import load_data_from_db
-from analysis_utils import transform_data_for_display_in_table, convert_date_column, add_month_and_year_columns, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit, prepare_account_data, prepare_credit_debit_data, prepare_profit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data
-from visualization_utils import create_account_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
+from analysis_utils import get_yearly_summary, transform_data_for_display_in_table, convert_date_column, add_month_and_year_columns, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit, prepare_account_data, prepare_credit_debit_data, prepare_profit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data
+from visualization_utils import create_yearly_summary_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
 from streamlit_option_menu import option_menu
 
 st.markdown(
@@ -119,8 +119,43 @@ if st.session_state.selected_page == "Dashboard Geral":
  
 # Página "Análise por Banco"
 if st.session_state.selected_page == "Análise por Banco":
-    st.title("Análise por Banco")
-    st.write("Aqui será o conteúdo da Análise por Banco.")
+    st.title("Análise por Banco e Ano")
+    data = load_data_from_db()
+    data = convert_date_column(data, "data")
+    data = add_month_and_year_columns(data,  "data")
+
+    # Filtros
+    st.header("Filtros")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        bancos_disponiveis = ["Todos os Bancos"] + list(data["banco"].unique())
+        selected_bank = st.selectbox("Selecione o Banco", bancos_disponiveis)
+
+    with col2:
+        anos_disponiveis = ["Todos os Anos"] + sorted(data["data"].dt.year.unique())
+        selected_year = st.selectbox("Selecione o Ano", anos_disponiveis)
+
+    if selected_bank != "Todos os Bancos":
+        data = data[data["banco"] == selected_bank]
+
+    if selected_year != "Todos os Anos":
+        data = data[data["data"].dt.year == selected_year]
+
+    data["ano"] = data["data"].dt.year
+    credit_summary = get_yearly_summary(data, "credito")
+    debit_summary = get_yearly_summary(data, "debito")
+
+    # Criar os gráficos
+    credit_chart = create_yearly_summary_chart(credit_summary, "credito", title="Resumo Anual de Crédito")
+    debit_chart = create_yearly_summary_chart(debit_summary, "debito", title="Resumo Anual de Débito")
+
+    st.header("Gráficos de Crédito e Débito")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.altair_chart(credit_chart, use_container_width=True)
+    with col2:
+        st.altair_chart(debit_chart, use_container_width=True)
 
 # Página "Histórico de Transações"
 if st.session_state.selected_page == "Histórico de Transações":
