@@ -1,11 +1,11 @@
 import streamlit as st
 from utils.analysis_utils import (
-    clean_balance_column, calculate_salary_expenses, calculate_monthly_profit,
+    analyze_supplier_profitability, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit,
     prepare_credit_debit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data,
     comparar_calcular_total
 )
 from utils.visualization_utils import (
-    create_salary_chart, create_profit_chart, create_credit_debit_chart,
+    create_salary_chart, create_profit_chart, create_credit_debit_chart, create_supplier_profit_chart,
     create_yearly_account_chart, create_yearly_subaccount_chart
 )
 from utils.db_utils import load_data_from_db
@@ -38,7 +38,7 @@ if filtered_data.empty:
     st.warning("Não há dados para o intervalo de anos selecionado.")
 else:
     # Organizar os gráficos em abas
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Geral", "📈 Entradas e Saídas", "🏦 Contas e Subcontas", "🔮 Guru das Previsões"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Geral", "📈 Entradas e Saídas", "🏦 Contas e Subcontas", "🔮 Guru das Previsões", "🚚 Fornecedores"])
 
     # Aba: Geral
     with tab1:
@@ -122,3 +122,23 @@ else:
         
         st.markdown("### Previsões")
         
+    with tab5:
+        st.markdown("### Fornecedores")
+        # Filtrar os dados pelo intervalo de tempo selecionado
+        filtered_data = data[(data['year'] >= start_year) & (data['year'] <= end_year)]
+        
+        # Realizar a análise de rentabilidade
+        profitability = analyze_supplier_profitability(filtered_data)
+        
+        if profitability.empty:
+            st.warning("Não há dados suficientes para calcular a rentabilidade dos fornecedores no período selecionado.")
+        else:
+            # Exibir a tabela de rentabilidade
+            st.markdown("### Rentabilidade por Fornecedor")
+            st.dataframe(profitability, use_container_width=True)
+        
+            # Criar e exibir o gráfico de rentabilidade
+            supplier_profit_chart = create_supplier_profit_chart(profitability)
+            st.altair_chart(supplier_profit_chart, use_container_width=True)
+
+

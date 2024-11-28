@@ -412,3 +412,22 @@ def comparar_anual(yearly_data):
         .properties(title="Ganhos e Gastos por Ano", width=600, height=400)
     )
     return chart
+
+
+def create_supplier_profit_chart(profitability):
+    """
+    Cria um gráfico de barras para mostrar a rentabilidade por fornecedor.
+    """
+    chart = alt.Chart(profitability).mark_bar().encode(
+        x=alt.X('subconta', sort='-y', title='Fornecedor'),
+        y=alt.Y('Rentabilidade', title='Rentabilidade Líquida (R$)'),
+        color=alt.Color('subconta', legend=None),
+        tooltip=['subconta', 'Receita', 'Despesa', 'Rentabilidade']
+    ).properties(
+        width=800,
+        height=400,
+        title='Rentabilidade por Fornecedor'
+    )
+    return chart
+
+

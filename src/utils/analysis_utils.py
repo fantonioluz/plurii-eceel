@@ -283,3 +283,44 @@ def prepare_yearly_data_for_line_chart(data, value_column):
     yearly_summary = data.groupby(["ano", "banco"])[value_column].sum().reset_index()
 
     return yearly_summary
+
+
+
+def analyze_supplier_profitability(data):
+    """
+    Análise de rentabilidade por fornecedor com base em receitas e despesas, 
+    considerando as colunas 'credito' e 'debito'.
+    """
+    # Filtrar as linhas relevantes para receitas e despesas com serviços
+    service_data = data[data['conta'].isin(['Receita com serviços', 'Despesa com serviços'])]
+    
+    # Filtrar pelas marcas relevantes na subconta
+    relevant_brands = ['Panasonic', 'Elgin', 'Spring', 'Fresnomaq']
+    filtered_data = service_data[service_data['subconta'].isin(relevant_brands)]
+    
+    # Garantir que as colunas 'credito' e 'debito' sejam numéricas
+    filtered_data['credito'] = pd.to_numeric(filtered_data['credito'], errors='coerce').fillna(0)
+    filtered_data['debito'] = pd.to_numeric(filtered_data['debito'], errors='coerce').fillna(0)
+    
+    # Criar a coluna 'Impacto' com tipo numérico
+    filtered_data['Impacto'] = 0.0  # Inicializar como float
+
+    # Adicionar receitas e subtrair despesas
+    filtered_data.loc[filtered_data['conta'] == 'Receita com serviços', 'Impacto'] += filtered_data['credito']
+    filtered_data.loc[filtered_data['conta'] == 'Despesa com serviços', 'Impacto'] -= filtered_data['debito']
+    
+    # Agrupar por subconta (marca) e calcular receita, despesa e rentabilidade
+    profitability = filtered_data.groupby('subconta').agg(
+        Receita=('credito', 'sum'),
+        Despesa=('debito', 'sum'),
+        Rentabilidade=('Impacto', 'sum')
+    ).reset_index()
+    
+    # Ordenar pela rentabilidade
+    profitability = profitability.sort_values(by='Rentabilidade', ascending=False)
+    
+    return profitability
+
+
+
+
