@@ -1,0 +1,16 @@
+[general]
+page_title = "FinancePro"
+page_icon = "🏠"
+
+[server]
+headless = true
+
+[theme]
+primaryColor = "#4A7CFF"
+backgroundColor = "#1E1E1E"
+secondaryBackgroundColor = "#262626"
+textColor = "#FFFFFF"
+
+[global]
+# Diretório explícito para as páginas
+pages_dir = "pages"
