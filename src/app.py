@@ -7,7 +7,7 @@ bank = st.Page("pages/bank_page.py", title="Analise por Bancos", icon="🏦")
 historic = st.Page("pages/historic_page.py", title="Historico de Transacoes", icon="📅")
 
 
-add_logo("src\images\FinancePro.png")
+add_logo("https://47093926.fs1.hubspotusercontent-na1.net/hubfs/47093926/FinancePro.png")
 
 st.markdown(
     """
