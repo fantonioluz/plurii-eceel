@@ -38,7 +38,7 @@ if filtered_data.empty:
     st.warning("Não há dados para o intervalo de anos selecionado.")
 else:
     # Organizar os gráficos em abas
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Geral", "📈 Entradas e Saídas", "🏦 Contas e Subcontas", "🔮 Guru das Previsões", "🚚 Fornecedores"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Geral", "📈 Entradas e Saídas", "🏦 Contas e Subcontas","🚚 Fornecedores"])
 
     # Aba: Geral
     with tab1:
@@ -162,11 +162,8 @@ else:
                         st.altair_chart(yearly_subaccount_chart, use_container_width=True)
                     else:
                         st.info("Sem dados de subcontas para o período selecionado.")
+        
     with tab4:
-        
-        st.markdown("### Previsões")
-        
-    with tab5:
         st.markdown("### Fornecedores")
         # Filtrar os dados pelo intervalo de tempo selecionado
         filtered_data = data[(data['year'] >= start_year) & (data['year'] <= end_year)]
