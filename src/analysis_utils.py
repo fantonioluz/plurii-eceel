@@ -100,8 +100,8 @@ def add_month_and_year_columns(data, date_column):
     Returns:
         pd.DataFrame: DataFrame com colunas de mês e ano.
     """
-    data['month'] = data[date_column].dt.month
-    data['year'] = data[date_column].dt.year
+    data['mes'] = data[date_column].dt.month
+    data['ano'] = data[date_column].dt.year
     return data
 
 def transform_data_for_display_in_table(data):
@@ -120,3 +120,71 @@ def transform_data_for_display_in_table(data):
     data = data.sort_values(by="data")
 
     return data[["data", "descricao", "documento", "debito", "credito","valor", "saldo", "banco", "conta", "subconta"]]
+
+def get_yearly_summary(data, value_column):
+    """
+    Calcula o resumo anual de um valor especificado.
+    """
+
+    if "ano" not in data.columns:
+        data["ano"] = data["ano"].dt.year
+    yearly_summary = data.groupby("ano")[value_column].sum().reset_index()
+
+    return yearly_summary
+
+def get_monthly_summary(data, value_column):
+    """
+    Calcula o resumo mensal de um valor especificado, agrupado por ano e mês.
+    """
+    data["data"] = pd.to_datetime(data["data"])
+
+    data["ano"] = data["data"].dt.year
+    data["mes"] = data["data"].dt.month
+
+    monthly_summary = data.groupby(["ano", "mes"])[value_column].sum().reset_index()
+
+    # Add uma coluna formatada Ano-Mês
+    monthly_summary["ano_mes"] = monthly_summary["ano"].astype(str) + "-" + monthly_summary["mes"].astype(str).str.zfill(2)
+
+    return monthly_summary
+
+def prepare_monthly_data_for_line_chart(data, value_column):
+    """
+    Prepara os dados mensais para o gráfico de linha, cruzando por banco.
+    Returns:
+        pd.DataFrame: DataFrame preparado com colunas 'ANO', 'MES', 'BANCO', 'ANO_MES' e o valor consolidado.
+    """
+    # Certifique-se de que a coluna DATA está no formato datetime
+    data["data"] = pd.to_datetime(data["data"])
+
+    # Adicionar colunas de ano e mês
+    data["ano"] = data["data"].dt.year
+    data["mes"] = data["data"].dt.month
+
+    # Consolidar os valores por ano, mês e banco
+    monthly_summary = data.groupby(["ano", "mes", "banco"])[value_column].sum().reset_index()
+
+    # Adicionar uma coluna formatada para exibição no gráfico (Ano-Mês)
+    monthly_summary["ano_mes"] = monthly_summary["ano"].astype(str) + "-" + monthly_summary["mes"].astype(str).str.zfill(2)
+
+    return monthly_summary
+
+def prepare_yearly_data_for_line_chart(data, value_column):
+    """
+    Prepara os dados anuais para o gráfico de linha, cruzando por banco.
+
+    Args:
+        data (pd.DataFrame): DataFrame contendo os dados.
+        value_column (str): Nome da coluna que será usada para os valores (ex.: 'credito', 'debito').
+
+    Returns:
+        pd.DataFrame: DataFrame preparado com colunas 'ANO', 'BANCO' e o valor consolidado.
+    """
+    # Certifique-se de que a coluna DATA está no formato datetime
+    data["data"] = pd.to_datetime(data["data"])
+
+    # Consolidar os valores por ano e banco
+    yearly_summary = data.groupby(["ano", "banco"])[value_column].sum().reset_index()
+
+    return yearly_summary
+

@@ -129,4 +129,116 @@ def create_yearly_subaccount_chart(grouped, conta):
 
     return chart
 
+def create_yearly_summary_chart(yearly_data, value_column, title="Resumo Anual"):
+    """
+    Cria um gráfico de barras ou linhas para resumir valores por ano.
+    """
+    chart = alt.Chart(yearly_data).mark_bar().encode(
+        x=alt.X("ano:O", title="Ano"),
+        y=alt.Y(f"{value_column}:Q", title="Total (R$)", axis=alt.Axis(format="~s")),
+        tooltip=[
+            alt.Tooltip("ano:O", title="Ano"),
+            alt.Tooltip(f"{value_column}:Q", title="Total", format=".2f")
+        ]
+    ).properties(
+        title=title,
+        width=800,
+        height=300
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_title(
+        fontSize=16
+    )
+
+    return chart
+def create_monthly_summary_chart(monthly_data, value_column, title="Resumo Mensal"):
+    """
+    Cria um gráfico de barras para resumir valores por ano e mês.
+    """
+    chart = alt.Chart(monthly_data).mark_bar().encode(
+        x=alt.X("ano_mes:O", title="Ano-Mês", axis=alt.Axis(labelAngle=-45)),
+        y=alt.Y(f"{value_column}:Q", title="Total (R$)", axis=alt.Axis(format="~s")),
+        tooltip=[
+            alt.Tooltip("ano:O", title="Ano"),
+            alt.Tooltip("mes:O", title="Mês"),
+            alt.Tooltip(f"{value_column}:Q", title="Total", format=".2f")
+        ]
+    ).properties(
+        title=title,
+        width=800,
+        height=300
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_title(
+        fontSize=16
+    )
+
+    return chart
+
+import altair as alt
+
+def create_monthly_line_chart(monthly_data, value_column, title="Resumo Mensal"):
+    """
+    Cria um gráfico de linha para resumir valores por ano e mês, cruzando por banco.
+
+    Args:
+        monthly_data (pd.DataFrame): DataFrame contendo os dados formatados (colunas 'ANO', 'MES', 'BANCO', 'ANO_MES' e valores).
+        value_column (str): Nome da coluna que será usada para os valores (ex.: 'VALOR', 'CREDITO', 'DEBITO').
+        title (str): Título do gráfico.
+
+    Returns:
+        alt.Chart: Gráfico Altair exibindo o resumo mensal cruzado por banco.
+    """
+    # Criar o gráfico de linha cruzando os dados por banco
+    chart = alt.Chart(monthly_data).mark_line(point=True).encode(
+        x=alt.X("ano_mes:O", title="Ano-Mês", axis=alt.Axis(labelAngle=-45)),
+        y=alt.Y(f"{value_column}:Q", title="Total (R$)", axis=alt.Axis(format="~s")),
+        color="banco:N",  # Cada banco com uma cor diferente
+        tooltip=[
+            alt.Tooltip("ano:O", title="Ano"),
+            alt.Tooltip("mes:O", title="Mês"),
+            alt.Tooltip("banco:N", title="Banco"),
+            alt.Tooltip(f"{value_column}:Q", title="Total", format=".2f")
+        ]
+    ).properties(
+        title=title,
+        width=800,
+        height=300
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_title(
+        fontSize=16
+    )
+
+    return chart
+
+def create_yearly_line_chart(yearly_data, value_column, title="Resumo Anual"):
+    """
+    Cria um gráfico de linha para resumir valores por ano, cruzando por banco.
+    """
+    # Criar o gráfico de linha cruzando os dados por banco
+    chart = alt.Chart(yearly_data).mark_line(point=True).encode(
+        x=alt.X("ano:O", title="Ano"),
+        y=alt.Y(f"{value_column}:Q", title="Total (R$)", axis=alt.Axis(format="~s")),
+        color="banco:N",  # Cada banco com uma cor diferente
+        tooltip=[
+            alt.Tooltip("ano:O", title="Ano"),
+            alt.Tooltip("banco:N", title="Banco"),
+            alt.Tooltip(f"{value_column}:Q", title="Total", format=".2f")
+        ]
+    ).properties(
+        title=title,
+        width=800,
+        height=300
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_title(
+        fontSize=16
+    )
+
+    return chart
 
