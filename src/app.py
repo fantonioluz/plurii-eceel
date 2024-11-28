@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 from db_utils import load_data_from_db
-from analysis_utils import get_monthly_summary, get_yearly_summary, transform_data_for_display_in_table, convert_date_column, add_month_and_year_columns, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit, prepare_account_data, prepare_credit_debit_data, prepare_profit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data
-from visualization_utils import create_monthly_summary_chart, create_yearly_summary_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
+from analysis_utils import prepare_yearly_data_for_line_chart, prepare_monthly_data_for_line_chart, get_monthly_summary, get_yearly_summary, transform_data_for_display_in_table, convert_date_column, add_month_and_year_columns, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit, prepare_account_data, prepare_credit_debit_data, prepare_profit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data
+from visualization_utils import  create_yearly_line_chart, create_monthly_line_chart, create_monthly_summary_chart, create_yearly_summary_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
 from streamlit_option_menu import option_menu
 
 st.markdown(
@@ -125,9 +125,7 @@ if st.session_state.selected_page == "Análise por Banco":
     data = add_month_and_year_columns(data,  "data")
 
     # Filtros
-    st.header("Filtros")
-    col1, col2 = st.columns(2)
-
+    col1, col2, col3= st.columns(3)
     with col1:
         bancos_disponiveis = ["Todos os Bancos"] + list(data["banco"].unique())
         selected_bank = st.selectbox("Selecione o Banco", bancos_disponiveis)
@@ -136,6 +134,9 @@ if st.session_state.selected_page == "Análise por Banco":
         anos_disponiveis = ["Todos os Anos"] + sorted(data["data"].dt.year.unique())
         selected_year = st.selectbox("Selecione o Ano", anos_disponiveis)
 
+    with col3:
+        chart_type = st.radio("Selecione o Tipo de Gráfico", ["Barra", "Linha"])
+
     if selected_bank != "Todos os Bancos":
         data = data[data["banco"] == selected_bank]
 
@@ -143,33 +144,42 @@ if st.session_state.selected_page == "Análise por Banco":
         data = data[data["data"].dt.year == selected_year]
 
     data["ano"] = data["data"].dt.year
-    credit_summary = get_yearly_summary(data, "credito")
-    debit_summary = get_yearly_summary(data, "debito")
+    if chart_type == "Barra":
+        credit_summary = get_yearly_summary(data, "credito")
+        debit_summary = get_yearly_summary(data, "debito")
+        credit_chart = create_yearly_summary_chart(credit_summary, "credito", title="Resumo Anual de Crédito")
+        debit_chart = create_yearly_summary_chart(debit_summary, "debito", title="Resumo Anual de Débito")
+    else:
+        credit_summary = prepare_yearly_data_for_line_chart(data, "credito")
+        debit_summary = prepare_yearly_data_for_line_chart(data, "debito")
+        credit_chart = create_yearly_line_chart(credit_summary, "credito", title="Crédito Anual por Banco")
+        debit_chart = create_yearly_line_chart(debit_summary, "debito", title="Débito Anual por Banco")
 
-    # Criar os gráficos
-    credit_chart = create_yearly_summary_chart(credit_summary, "credito", title="Resumo Anual de Crédito")
-    debit_chart = create_yearly_summary_chart(debit_summary, "debito", title="Resumo Anual de Débito")
-
-    st.header("Gráficos de Crédito e Débito")
-    col1, col2 = st.columns(2)
-    with col1:
+    st.subheader("Gráficos de Crédito e Débito")
+    col4, col5 = st.columns(2)
+    with col4:
         st.altair_chart(credit_chart, use_container_width=True)
-    with col2:
+    with col5:
         st.altair_chart(debit_chart, use_container_width=True)
     
-    # Resumo Mensal
-    credit_summary_month = get_monthly_summary(data, "credito")
-    debit_summary_month = get_monthly_summary(data, "debito")
 
-    # Gráficos Mensais
-    credit_chart_month= create_monthly_summary_chart(credit_summary_month, "credito", title="Resumo Mensal de Crédito")
-    debit_chart_month = create_monthly_summary_chart(debit_summary_month, "debito", title="Resumo Mensal de Débito")
-    # Exibir os gráficos lado a lado
-    st.header("Gráficos de Crédito e Débito por Mês")
-    col1, col2 = st.columns(2)
-    with col1:
+    if chart_type == "Barra":
+        credit_summary_month = get_monthly_summary(data, "credito")
+        debit_summary_month = get_monthly_summary(data, "debito")
+        credit_chart_month = create_monthly_summary_chart(credit_summary_month, "credito", title="Resumo Mensal de Crédito")
+        debit_chart_month = create_monthly_summary_chart(debit_summary_month, "debito", title="Resumo Mensal de Débito")
+    else:
+        # gráficos de linha
+        credit_summary_month = prepare_monthly_data_for_line_chart(data, "credito")
+        debit_summary_month = prepare_monthly_data_for_line_chart(data, "debito")
+        credit_chart_month = create_monthly_line_chart(credit_summary_month, "credito", title="Crédito Mensal por Banco")
+        debit_chart_month = create_monthly_line_chart(debit_summary_month, "debito", title="Débito Mensal por Banco")
+
+    st.subheader("Gráficos de Crédito e Débito por Mês")
+    col6, col7 = st.columns(2)
+    with col6:
         st.altair_chart(credit_chart_month, use_container_width=True)
-    with col2:
+    with col7:
         st.altair_chart(debit_chart_month, use_container_width=True)
 
 
@@ -230,7 +240,6 @@ if st.session_state.selected_page == "Histórico de Transações":
         total_profit = total_credit - total_debit
 
         col3, col4, col5 = st.columns(3)
-
         with col3:
             st.markdown(
                 f"""
