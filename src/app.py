@@ -10,7 +10,7 @@ st.markdown(
     """
     <style>
     .stMainBlockContainer.block-container {
-        max-width: 1200px; /* Altere para o tamanho desejado */
+        max-width: 100%; /* Altere para o tamanho desejado */
         padding: 2rem; /* Ajuste o espaçamento interno */
     }
     </style>
