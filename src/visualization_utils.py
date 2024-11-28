@@ -1,4 +1,5 @@
 import altair as alt
+import plotly.express as px
 
 
 def create_salary_chart(salary_expenses):

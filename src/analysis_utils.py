@@ -1,5 +1,4 @@
 import pandas as pd
-import plotly.express as px
 
 
 def clean_balance_column(data):
