@@ -130,5 +130,4 @@ Se você deseja contribuir com melhorias no projeto:
 ## **Licença**
 
 Este projeto está sob a licença [MIT](LICENSE). Sinta-se à vontade para utilizá-lo e modificá-lo conforme necessário.
-```
 
