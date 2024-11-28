@@ -1,70 +1,131 @@
 import streamlit as st
+import pandas as pd
+from utils.analysis_utils import convert_date_column, transform_data_for_display_in_table
 
-st.title("Análise por Banco e Ano")
+from utils.db_utils import load_data_from_db
+
+st.title("Histórico de Transações")
 data = load_data_from_db()
 data = convert_date_column(data, "data")
-data = add_month_and_year_columns(data, "data")
-# Filtros
-col1, col2, col3 = st.columns(3)
+col1, col2, col6, col7, col8 = st.columns(5)
 with col1:
-    bancos_disponiveis = ["Todos os Bancos"] + list(data["banco"].unique())
-    selected_bank = st.selectbox("Selecione o Banco", bancos_disponiveis)
+    selected_month = st.selectbox(
+        "Selecione o mês", ["Ano Todo"] + [f"{i:02d}" for i in range(1, 13)]
+    )
 with col2:
-    anos_disponiveis = ["Todos os Anos"] + sorted(data["data"].dt.year.unique())
-    selected_year = st.selectbox("Selecione o Ano", anos_disponiveis)
-with col3:
-    chart_type = st.radio("Selecione o Tipo de Gráfico", ["Barra", "Linha"])
-if selected_bank != "Todos os Bancos":
-    data = data[data["banco"] == selected_bank]
-if selected_year != "Todos os Anos":
-    data = data[data["data"].dt.year == selected_year]
-data["ano"] = data["data"].dt.year
-if chart_type == "Barra":
-    credit_summary = get_yearly_summary(data, "credito")
-    debit_summary = get_yearly_summary(data, "debito")
-    credit_chart = create_yearly_summary_chart(
-        credit_summary, "credito", title="Resumo Anual de Crédito"
+    selected_year = st.number_input(
+        "Digite o ano",
+        min_value=2000,
+        max_value=int(pd.Timestamp.now().year),
+        value=int(pd.Timestamp.now().year),
+        step=1,
     )
-    debit_chart = create_yearly_summary_chart(
-        debit_summary, "debito", title="Resumo Anual de Débito"
-    )
+if selected_month == "Ano Todo":
+    filtered_data = data[data["data"].dt.year == selected_year]
 else:
-    credit_summary = prepare_yearly_data_for_line_chart(data, "credito")
-    debit_summary = prepare_yearly_data_for_line_chart(data, "debito")
-    credit_chart = create_yearly_line_chart(
-        credit_summary, "credito", title="Crédito Anual por Banco"
-    )
-    debit_chart = create_yearly_line_chart(
-        debit_summary, "debito", title="Débito Anual por Banco"
-    )
-st.subheader("Gráficos de Crédito e Débito")
-col4, col5 = st.columns(2)
-with col4:
-    st.altair_chart(credit_chart, use_container_width=True)
-with col5:
-    st.altair_chart(debit_chart, use_container_width=True)
-if chart_type == "Barra":
-    credit_summary_month = get_monthly_summary(data, "credito")
-    debit_summary_month = get_monthly_summary(data, "debito")
-    credit_chart_month = create_monthly_summary_chart(
-        credit_summary_month, "credito", title="Resumo Mensal de Crédito"
-    )
-    debit_chart_month = create_monthly_summary_chart(
-        debit_summary_month, "debito", title="Resumo Mensal de Débito"
-    )
+    filtered_data = data[
+        (data["data"].dt.month == int(selected_month))
+        & (data["data"].dt.year == selected_year)
+    ]
+transformed_data = transform_data_for_display_in_table(filtered_data)
+if transformed_data.empty:
+    st.warning("Nenhum dado encontrado para o período selecionado.")
 else:
-    # gráficos de linha
-    credit_summary_month = prepare_monthly_data_for_line_chart(data, "credito")
-    debit_summary_month = prepare_monthly_data_for_line_chart(data, "debito")
-    credit_chart_month = create_monthly_line_chart(
-        credit_summary_month, "credito", title="Crédito Mensal por Banco"
-    )
-    debit_chart_month = create_monthly_line_chart(
-        debit_summary_month, "debito", title="Débito Mensal por Banco"
-    )
-st.subheader("Gráficos de Crédito e Débito por Mês")
-col6, col7 = st.columns(2)
-with col6:
-    st.altair_chart(credit_chart_month, use_container_width=True)
-with col7:
-    st.altair_chart(debit_chart_month, use_container_width=True)
+    # Filtros
+    with col6:
+        unique_banks = transformed_data["banco"].unique()
+        selected_bank = st.selectbox(
+            "Selecione o Banco", options=["Todos"] + list(unique_banks)
+        )
+        if selected_bank != "Todos":
+            transformed_data = transformed_data[
+                transformed_data["banco"] == selected_bank
+            ]
+    with col7:
+        unique_subaccounts = transformed_data["subconta"].unique()
+        selected_subaccount = st.selectbox(
+            "Selecione a Subconta", options=["Todas"] + list(unique_subaccounts)
+        )
+        if selected_subaccount != "Todas":
+            transformed_data = transformed_data[
+                transformed_data["subconta"] == selected_subaccount
+            ]
+    with col8:
+        description_filter = st.text_input("Filtrar por Descrição")
+        if description_filter:
+            transformed_data = transformed_data[
+                transformed_data["descricao"].str.contains(
+                    description_filter, case=False, na=False
+                )
+            ]
+    if transformed_data.empty:
+        st.warning("Nenhum dado encontrado com os filtros aplicados.")
+    else:
+        columns_to_display = [
+            "data",
+            "descricao",
+            "documento",
+            "valor",
+            "banco",
+            "conta",
+            "subconta",
+        ]
+        st.dataframe(transformed_data[columns_to_display].reset_index(drop=True))
+    total_debit = transformed_data["debito"].sum()
+    total_credit = transformed_data["credito"].sum()
+    total_profit = total_credit - total_debit
+    col3, col4, col5 = st.columns(3)
+    with col3:
+        st.markdown(
+            f"""
+            <div style="
+                background-color: #e7f9e7;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+                color: #4CAF50; 
+                margin: 30px;
+            ">
+            Total Crédito: R$ {total_credit:,.2f}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col4:
+        st.markdown(
+            f"""
+            <div style="
+                background-color: #f9e7e7;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+                color: #FF5733;
+                margin: 30px;
+            ">
+            Total Débito: R$ {total_debit:,.2f}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col5:
+        st.markdown(
+            f"""
+            <div style="
+                background-color: #e7f3f9;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+                color: #33B5E5;
+                margin: 30px;
+            ">
+            Total Lucro: R$ {total_profit:,.2f}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
