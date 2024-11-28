@@ -131,3 +131,19 @@ def get_yearly_summary(data, value_column):
     yearly_summary = data.groupby("ano")[value_column].sum().reset_index()
 
     return yearly_summary
+
+def get_monthly_summary(data, value_column):
+    """
+    Calcula o resumo mensal de um valor especificado, agrupado por ano e mês.
+    """
+    data["data"] = pd.to_datetime(data["data"])
+
+    data["ano"] = data["data"].dt.year
+    data["mes"] = data["data"].dt.month
+
+    monthly_summary = data.groupby(["ano", "mes"])[value_column].sum().reset_index()
+
+    # Add uma coluna formatada Ano-Mês
+    monthly_summary["ano_mes"] = monthly_summary["ano"].astype(str) + "-" + monthly_summary["mes"].astype(str).str.zfill(2)
+
+    return monthly_summary

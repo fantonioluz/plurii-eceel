@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 from db_utils import load_data_from_db
-from analysis_utils import get_yearly_summary, transform_data_for_display_in_table, convert_date_column, add_month_and_year_columns, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit, prepare_account_data, prepare_credit_debit_data, prepare_profit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data
-from visualization_utils import create_yearly_summary_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
+from analysis_utils import get_monthly_summary, get_yearly_summary, transform_data_for_display_in_table, convert_date_column, add_month_and_year_columns, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit, prepare_account_data, prepare_credit_debit_data, prepare_profit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data
+from visualization_utils import create_monthly_summary_chart, create_yearly_summary_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
 from streamlit_option_menu import option_menu
 
 st.markdown(
@@ -156,6 +156,22 @@ if st.session_state.selected_page == "Análise por Banco":
         st.altair_chart(credit_chart, use_container_width=True)
     with col2:
         st.altair_chart(debit_chart, use_container_width=True)
+    
+    # Resumo Mensal
+    credit_summary_month = get_monthly_summary(data, "credito")
+    debit_summary_month = get_monthly_summary(data, "debito")
+
+    # Gráficos Mensais
+    credit_chart_month= create_monthly_summary_chart(credit_summary_month, "credito", title="Resumo Mensal de Crédito")
+    debit_chart_month = create_monthly_summary_chart(debit_summary_month, "debito", title="Resumo Mensal de Débito")
+    # Exibir os gráficos lado a lado
+    st.header("Gráficos de Crédito e Débito por Mês")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.altair_chart(credit_chart_month, use_container_width=True)
+    with col2:
+        st.altair_chart(debit_chart_month, use_container_width=True)
+
 
 # Página "Histórico de Transações"
 if st.session_state.selected_page == "Histórico de Transações":

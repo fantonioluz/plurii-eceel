@@ -152,4 +152,28 @@ def create_yearly_summary_chart(yearly_data, value_column, title="Resumo Anual")
     )
 
     return chart
+def create_monthly_summary_chart(monthly_data, value_column, title="Resumo Mensal"):
+    """
+    Cria um gráfico de barras para resumir valores por ano e mês.
+    """
+    chart = alt.Chart(monthly_data).mark_bar().encode(
+        x=alt.X("ano_mes:O", title="Ano-Mês", axis=alt.Axis(labelAngle=-45)),
+        y=alt.Y(f"{value_column}:Q", title="Total (R$)", axis=alt.Axis(format="~s")),
+        tooltip=[
+            alt.Tooltip("ano:O", title="Ano"),
+            alt.Tooltip("mes:O", title="Mês"),
+            alt.Tooltip(f"{value_column}:Q", title="Total", format=".2f")
+        ]
+    ).properties(
+        title=title,
+        width=800,
+        height=400
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_title(
+        fontSize=16
+    )
+
+    return chart
 
