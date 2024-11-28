@@ -38,7 +38,7 @@ if filtered_data.empty:
     st.warning("Não há dados para o intervalo de anos selecionado.")
 else:
     # Organizar os gráficos em abas
-    tab1, tab2, tab3 = st.tabs(["📊 Geral", "📈 Entradas e Saídas", "🏦 Contas e Subcontas"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Geral", "📈 Entradas e Saídas", "🏦 Contas e Subcontas", "🔮 Guru das Previsões"])
 
     # Aba: Geral
     with tab1:
@@ -77,30 +77,30 @@ else:
 # Aba: Contas e Subcontas
     with tab3:
         st.markdown("### Total de Débito e Crédito por Ano e Conta/Subconta")
-    
+
         # Filtro para selecionar o tipo de conta
         available_accounts = filtered_data['conta'].unique()
         selected_account = st.selectbox("Selecione o tipo de conta:", options=available_accounts, index=0)
-    
+
         # Filtrar os dados pelo tipo de conta selecionado
         filtered_account_data = filtered_data[filtered_data['conta'] == selected_account]
-    
+
         if filtered_account_data.empty:
             st.info(f"Não há dados para a conta '{selected_account}' no período selecionado.")
         else:
             # Filtro para selecionar o tipo de subconta
             available_subaccounts = filtered_account_data['subconta'].unique()
             selected_subaccount = st.selectbox("Selecione o tipo de subconta:", options=available_subaccounts, index=0)
-    
+
             # Filtrar os dados pelo tipo de subconta selecionado
             filtered_subaccount_data = filtered_account_data[filtered_account_data['subconta'] == selected_subaccount]
-    
+
             if filtered_subaccount_data.empty:
                 st.info(f"Não há dados para a subconta '{selected_subaccount}' no período selecionado.")
             else:
                 # Gráficos por ano e conta/subconta
                 col1, col2 = st.columns(2)
-    
+
                 with col1:
                     yearly_account_data = prepare_yearly_account_data(filtered_subaccount_data)
                     if not yearly_account_data.empty:
@@ -109,7 +109,7 @@ else:
                         st.altair_chart(yearly_account_chart, use_container_width=True)
                     else:
                         st.info("Sem dados de contas para o período selecionado.")
-    
+
                 with col2:
                     yearly_subaccount_data = prepare_yearly_subaccount_data(filtered_subaccount_data, selected_subaccount)
                     if not yearly_subaccount_data.empty:
@@ -118,3 +118,7 @@ else:
                         st.altair_chart(yearly_subaccount_chart, use_container_width=True)
                     else:
                         st.info("Sem dados de subcontas para o período selecionado.")
+    with tab4:
+        
+        st.markdown("### Previsões")
+        
