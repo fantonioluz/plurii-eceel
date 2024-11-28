@@ -1,7 +1,23 @@
 import streamlit as st
 import pandas as pd
 from db_utils import load_data_from_db
-from analysis_utils import transform_data_for_display_in_table, convert_date_column, add_month_and_year_columns, clean_balance_column, calculate_salary_expenses, calculate_monthly_profit, prepare_account_data, prepare_credit_debit_data, prepare_profit_data, prepare_yearly_account_data, prepare_yearly_subaccount_data
+from analysis_utils import (
+    transform_data_for_display_in_table,
+    convert_date_column,
+    add_month_and_year_columns,
+    clean_balance_column,
+    calculate_salary_expenses,
+    calculate_monthly_profit,
+    prepare_account_data,
+    prepare_credit_debit_data,
+    prepare_profit_data,
+    prepare_yearly_account_data,
+    prepare_yearly_subaccount_data,
+    calculate_total,
+    create_weekly_chart,
+    create_monthly_chart,
+    create_yearly_chart,
+)
 from visualization_utils import create_account_chart, create_credit_debit_chart,  create_salary_chart, create_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart
 from streamlit_option_menu import option_menu
 
@@ -86,7 +102,7 @@ if st.session_state.selected_page == "Dashboard Geral":
     monthly_profit = calculate_monthly_profit(data)
     profit_chart = create_profit_chart(monthly_profit)
     st.altair_chart(profit_chart)
-    
+
     # Preparar dados para entradas e saídas mensais
     credit_debit_data = prepare_credit_debit_data(data)
 
@@ -94,7 +110,7 @@ if st.session_state.selected_page == "Dashboard Geral":
     st.subheader("Entradas e Saídas Mensais (Crédito e Débito)")
     credit_debit_chart = create_credit_debit_chart(credit_debit_data)
     st.altair_chart(credit_debit_chart)
-    
+
     # Exibir tabela de dados de entradas e saídas mensais
     st.write("Dados de Entradas e Saídas Mensais:")
     st.write(credit_debit_data)
@@ -116,7 +132,53 @@ if st.session_state.selected_page == "Dashboard Geral":
     yearly_subaccount_data_administrativas = prepare_yearly_subaccount_data(data, 'Despesas administrativas')
     yearly_subaccount_chart_administrativas = create_yearly_subaccount_chart(yearly_subaccount_data_administrativas, 'Despesas administrativas')
     st.altair_chart(yearly_subaccount_chart_administrativas)
- 
+
+    # Comparação de ganhos e gastos
+    st.subheader("Comparação de Ganhos e Gastos")
+
+    # Selecionar o tipo de período
+    period_type = st.radio(
+        "Selecione o tipo de período para análise:", ["Semanal", "Mensal", "Anual"]
+    )
+
+    # Controlar o número de períodos a exibir
+    if period_type == "Anual":
+        num_periods = st.slider(
+            "Quantos anos você deseja visualizar?", min_value=1, max_value=3, value=3
+        )
+    else:
+        num_periods = st.slider(
+            "Quantos períodos você deseja visualizar?", min_value=1, max_value=12, value=3
+        )
+
+    # Calcular totais
+    totais_semana, totais_mes, totais_ano = calculate_total(data)
+
+    # Mostrar os dados e gráficos com base na seleção
+    if period_type == "Semanal":
+        st.markdown(f"#### Últimas {num_periods} semanas")
+        weekly_data = totais_semana.head(num_periods)
+        fig_semana = create_weekly_chart(weekly_data)
+        st.plotly_chart(fig_semana)
+        st.write("Dados detalhados das semanas selecionadas:")
+        st.dataframe(weekly_data)
+
+    elif period_type == "Mensal":
+        st.markdown(f"#### Últimos {num_periods} meses")
+        monthly_data = totais_mes.head(num_periods)
+        fig_mes = create_monthly_chart(monthly_data)
+        st.plotly_chart(fig_mes)
+        st.write("Dados detalhados dos meses selecionados:")
+        st.dataframe(monthly_data)
+
+    elif period_type == "Anual":
+        st.markdown(f"#### Últimos {num_periods} anos")
+        yearly_data = totais_ano.head(num_periods)
+        fig_ano = create_yearly_chart(yearly_data)
+        st.plotly_chart(fig_ano)
+        st.write("Dados detalhados dos anos selecionados:")
+        st.dataframe(yearly_data)
+
 # Página "Análise por Banco"
 if st.session_state.selected_page == "Análise por Banco":
     st.title("Análise por Banco")

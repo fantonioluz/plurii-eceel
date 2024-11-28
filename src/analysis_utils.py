@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly.express as px
 
 def clean_balance_column(data):
     """
@@ -120,3 +121,80 @@ def transform_data_for_display_in_table(data):
     data = data.sort_values(by="data")
 
     return data[["data", "descricao", "documento", "debito", "credito","valor", "saldo", "banco", "conta", "subconta"]]
+
+
+def calculate_total(data):
+    """
+    - Calcula os totais de crédito, débito e saldo para os últimos 3 períodos: semanas, meses e anos.
+    """
+    # Converter a coluna de data para datetime
+    data["data"] = pd.to_datetime(data["data"])
+
+    # Adicionar colunas para semana, mês e ano
+    data["semana"] = data["data"].dt.to_period("W").apply(lambda r: r.start_time)
+    data["mes"] = data["data"].dt.to_period("M").apply(lambda r: r.start_time)
+    data["ano"] = data["data"].dt.year
+
+    # Função para calcular totais por período
+    def calculate_total_per_period(df, periodo_col, label):
+        df_periodo = (
+            df.groupby(periodo_col)
+            .agg({"credito": "sum", "debito": "sum"})
+            .reset_index()
+        )
+        df_periodo["saldo"] = df_periodo["credito"] - df_periodo["debito"]
+        df_periodo = df_periodo.sort_values(periodo_col, ascending=False).head(3)
+        df_periodo = df_periodo.rename(columns={periodo_col: label})
+        return df_periodo
+
+    # Calcular totais para semanas, meses e anos
+    totais_semana = calculate_total_per_period(data, "semana", "Semana")
+    totais_mes = calculate_total_per_period(data, "mes", "Mês")
+    totais_ano = calculate_total_per_period(data, "ano", "Ano")
+
+    return totais_semana, totais_mes, totais_ano
+
+
+def create_weekly_chart(weekly_data):
+    """
+    - Cria um gráfico de barras para comparação de crédito, débito e saldo semanal.
+    - weekly_data (pd.DataFrame): Dados semanais com crédito, débito e saldo.
+    - Gráfico de barras semanal.
+    """
+    fig = px.bar(
+        weekly_data,
+        x="Semana",
+        y=["credito", "debito", "saldo"],
+        title="Ganhos e Gastos por Semana",
+    )
+    return fig
+
+
+def create_monthly_chart(monthly_data):
+    """
+    - Cria um gráfico de barras para comparação de crédito, débito e saldo mensal.
+    - monthly_data (pd.DataFrame): Dados mensais com crédito, débito e saldo.
+    - Gráfico de barras mensal.
+    """
+    fig = px.bar(
+        monthly_data,
+        x="Mês",
+        y=["credito", "debito", "saldo"],
+        title="Ganhos e Gastos por Mês",
+    )
+    return fig
+
+
+def create_yearly_chart(yearly_data):
+    """
+    - Cria um gráfico de barras para comparação de crédito, débito e saldo anual.
+    - yearly_data (pd.DataFrame): Dados anuais com crédito, débito e saldo.
+    - Gráfico de barras anual.
+    """
+    fig = px.bar(
+        yearly_data,
+        x="Ano",
+        y=["credito", "debito", "saldo"],
+        title="Ganhos e Gastos por Ano",
+    )
+    return fig
