@@ -19,14 +19,3 @@ with col2:
 # Notificações
 st.info("🔔 Não há nenhuma notificação no momento.")
 
-# Botões de navegação
-st.write("### Ações rápidas")
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("Ir ao Dashboard"):
-        st.session_state.selected_page = "Dashboard Geral"
-        st.query_params.update(page="Dashboard Geral")  # Redirecionar
-with col2:
-    if st.button("Histórico de Transações"):
-        st.session_state.selected_page = "Histórico de Transações"
-        st.query_params.update(page="Histórico de Transações")  # Redirecionar
