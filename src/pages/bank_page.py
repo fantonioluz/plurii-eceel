@@ -6,11 +6,6 @@ from utils.visualization_utils import create_yearly_summary_chart, create_yearly
 from utils.db_utils import load_data_from_db
 
 
-st.set_page_config(
-    page_title="Análise por Banco",
-    page_icon="🏦",  # Ícone de banco
-    layout="wide"
-)
 
 st.title("Análise por Banco e Ano")
 data = load_data_from_db()

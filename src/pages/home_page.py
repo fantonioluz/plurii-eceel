@@ -1,11 +1,7 @@
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Home",
-    page_icon="🏠",  # Ícone de casa
-    layout="wide"
-)
+
 
 # Cabeçalho principal
 st.title("ECEEL - TEC")
