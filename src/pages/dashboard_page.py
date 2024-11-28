@@ -6,7 +6,7 @@ from utils.analysis_utils import (
 )
 from utils.visualization_utils import (
     create_salary_chart, create_profit_chart, create_credit_debit_chart, create_supplier_profit_chart,
-    create_yearly_account_chart, create_yearly_subaccount_chart
+    create_yearly_account_chart, create_yearly_subaccount_chart, create_supplier_profit_chart, create_yearly_account_chart, create_yearly_subaccount_chart, comparar_semanal, comparar_mensal, comparar_anual
 )
 from utils.db_utils import load_data_from_db
 import pandas as pd
@@ -63,16 +63,60 @@ else:
                 st.altair_chart(profit_chart, use_container_width=True)
             else:
                 st.info("Sem dados de lucro mensal para o período.")
+        
+        
+            # Comparação de ganhos e gastos
+        st.subheader("Comparação de Ganhos e Gastos")
 
-    # Aba: Entradas e Saídas
-    with tab2:
-        st.markdown("### Entradas e Saídas Mensais")
-        credit_debit_data = prepare_credit_debit_data(filtered_data)
-        if not credit_debit_data.empty:
-            credit_debit_chart = create_credit_debit_chart(credit_debit_data)
-            st.altair_chart(credit_debit_chart, use_container_width=True)
-        else:
-            st.info("Sem dados de entradas e saídas para o período.")
+        # Selecionar o tipo de período
+        period_type = st.radio(
+            "Selecione o tipo de período para análise:", ["Semanal", "Mensal", "Anual"]
+        )
+
+        # Controlar o número de períodos a exibir
+        num_periods = st.slider(
+            "Quantos períodos você deseja visualizar?",
+            min_value=1,
+            max_value=3,
+            value=3
+        )
+
+        # Calcular totais
+        totais_semana, totais_mes, totais_ano = comparar_calcular_total(data)
+
+        # Mostrar os dados e gráficos com base na seleção
+        if period_type == "Semanal":
+            st.markdown(f"#### Últimas {num_periods} semanas")
+            weekly_data = totais_semana.head(num_periods)
+            chart_semanal = comparar_semanal(weekly_data)
+            st.altair_chart(chart_semanal, use_container_width=True)
+            st.write("Dados detalhados das semanas selecionadas:")
+            st.dataframe(weekly_data)
+
+        elif period_type == "Mensal":
+            st.markdown(f"#### Últimos {num_periods} meses")
+            monthly_data = totais_mes.head(num_periods)
+            chart_mensal = comparar_mensal(monthly_data)
+            st.altair_chart(chart_mensal, use_container_width=True)
+            st.write("Dados detalhados dos meses selecionados:")
+            st.dataframe(monthly_data)
+
+        elif period_type == "Anual":
+            st.markdown(f"#### Últimos {num_periods} anos")
+            yearly_data = totais_ano.head(num_periods)
+            chart_anual = comparar_anual(yearly_data)
+            st.altair_chart(chart_anual, use_container_width=True)
+            st.write("Dados detalhados dos anos selecionados:")
+
+        # Aba: Entradas e Saídas
+        with tab2:
+            st.markdown("### Entradas e Saídas Mensais")
+            credit_debit_data = prepare_credit_debit_data(filtered_data)
+            if not credit_debit_data.empty:
+                credit_debit_chart = create_credit_debit_chart(credit_debit_data)
+                st.altair_chart(credit_debit_chart, use_container_width=True)
+            else:
+                st.info("Sem dados de entradas e saídas para o período.")
 
 # Aba: Contas e Subcontas
     with tab3:
