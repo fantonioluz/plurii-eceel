@@ -154,7 +154,7 @@ else:
                     if not yearly_subaccount_data.empty:
                         st.markdown(f"#### Por Subconta: {selected_subaccount}")
                         yearly_subaccount_chart = create_yearly_subaccount_chart(yearly_subaccount_data, selected_subaccount)
-                        st.altair_chart(yearly_subaccount_chart, use_container_width=True)
+                        st.altair_chart(yearly_subaccount_chart)
                     else:
                         st.info("Sem dados de subcontas para o período selecionado.")
         

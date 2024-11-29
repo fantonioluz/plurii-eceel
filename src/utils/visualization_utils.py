@@ -116,6 +116,9 @@ def create_yearly_account_chart(grouped):
     """
     Cria um gráfico de barras para total de débito e crédito por ano e conta.
     """
+    if grouped.empty:
+        return alt.Chart().mark_text().encode(text="Sem dados disponíveis.")  # Exibe texto informativo
+
     chart = (
         alt.Chart(grouped)
         .transform_fold(["credito", "debito"], as_=["Tipo", "Valor"])
@@ -131,7 +134,9 @@ def create_yearly_account_chart(grouped):
             ],
         )
         .properties(
-            width=150, height=400, title="Total de Débito e Crédito por Ano e Conta"
+            width=150,
+            height=400,
+            title="Total de Débito e Crédito por Ano e Conta"
         )
         .configure_axis(labelFontSize=12, titleFontSize=14)
         .configure_title(fontSize=16)
@@ -143,6 +148,9 @@ def create_yearly_subaccount_chart(grouped, conta):
     """
     Cria um gráfico de barras para total de débito e crédito por ano e subconta para uma conta específica.
     """
+    if grouped.empty:
+        return alt.Chart().mark_text().encode(text="Sem dados disponíveis.")  # Exibe texto informativo
+
     # Ordenar subcontas por maior despesa (débito) dentro de cada ano
     sorted_grouped = grouped.sort_values(by=["year", "debito"], ascending=[True, False])
 
@@ -161,7 +169,7 @@ def create_yearly_subaccount_chart(grouped, conta):
             ],
         )
         .properties(
-            width=150,
+            width=500,
             height=400,
             title=f"Total de Débito e Crédito por Ano e Subconta ({conta})",
         )

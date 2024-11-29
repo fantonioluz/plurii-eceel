@@ -1,4 +1,5 @@
 import pandas as pd
+import streamlit as st
 
 def clean_balance_column(data):
     """
@@ -102,8 +103,17 @@ def prepare_yearly_account_data(data):
     """
     Prepara os dados para o gráfico de total de débito e crédito por ano e conta.
     """
-    data["data"] = pd.to_datetime(data["data"])
+    # Garantir que a coluna 'data' esteja no formato datetime
+    data["data"] = pd.to_datetime(data["data"], errors='coerce')
+    
+    # Garantir que as colunas 'credito' e 'debito' sejam numéricas
+    data["credito"] = pd.to_numeric(data["credito"], errors="coerce").fillna(0)
+    data["debito"] = pd.to_numeric(data["debito"], errors="coerce").fillna(0)
+    
+    # Extrair o ano para agrupamento
     data["year"] = data["data"].dt.year
+    
+    # Agrupar por ano e conta
     grouped = data.groupby(["year", "conta"])[["credito", "debito"]].sum().reset_index()
     return grouped
 
@@ -112,14 +122,29 @@ def prepare_yearly_subaccount_data(data, conta):
     """
     Prepara os dados para o gráfico de total de débito e crédito por ano e subconta para uma conta específica.
     """
-    data["data"] = pd.to_datetime(data["data"])
+    # Garantir que a coluna 'data' esteja no formato datetime
+    data["data"] = pd.to_datetime(data["data"], errors="coerce")
+
+    # Garantir que as colunas 'credito' e 'debito' sejam numéricas
+    data["credito"] = pd.to_numeric(data["credito"], errors="coerce").fillna(0)
+    data["debito"] = pd.to_numeric(data["debito"], errors="coerce").fillna(0)
+
+    # Extrair o ano para agrupamento
     data["year"] = data["data"].dt.year
-    filtered_data = data[data["conta"] == conta]
+    
+    # Filtrar os dados pela conta especificada
+    filtered_data = data[data["subconta"].str.strip().str.lower() == conta.strip().lower()]
+    # Verificar se o DataFrame filtrado está vazio
+    if filtered_data.empty:
+        return pd.DataFrame()  # Retornar um DataFrame vazio para evitar erros
+
+    # Agrupar por ano e subconta, somando os valores de crédito e débito
     grouped = (
         filtered_data.groupby(["year", "subconta"])[["credito", "debito"]]
         .sum()
         .reset_index()
     )
+
     return grouped
 
 def convert_date_column(data, column_name):
