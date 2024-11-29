@@ -123,6 +123,7 @@ else:
 
         # Filtrar os dados pelo tipo de conta selecionado
         filtered_account_data = filtered_data[filtered_data['conta'] == selected_account]
+        
 
         if filtered_account_data.empty:
             st.info(f"Não há dados para a conta '{selected_account}' no período selecionado.")
@@ -141,7 +142,7 @@ else:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    yearly_account_data = prepare_yearly_account_data(filtered_subaccount_data)
+                    yearly_account_data = prepare_yearly_account_data(filtered_account_data)
                     if not yearly_account_data.empty:
                         st.markdown(f"#### Por Ano e Conta: {selected_account}")
                         yearly_account_chart = create_yearly_account_chart(yearly_account_data)
