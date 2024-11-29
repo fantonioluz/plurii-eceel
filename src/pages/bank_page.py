@@ -32,24 +32,16 @@ if selected_year != "Todos os Anos":
     data = data[data["data"].dt.year == selected_year]
 
 data["ano"] = data["data"].dt.year
-if chart_type == "Barra":
-    credit_summary = get_yearly_summary(data, "credito")
-    debit_summary = get_yearly_summary(data, "debito")
-    credit_chart = create_yearly_summary_chart(
-        credit_summary, "credito", title="Resumo Anual de Crédito"
-    )
-    debit_chart = create_yearly_summary_chart(
-        debit_summary, "debito", title="Resumo Anual de Débito"
-    )
-else:
-    credit_summary = prepare_yearly_data_for_line_chart(data, "credito")
-    debit_summary = prepare_yearly_data_for_line_chart(data, "debito")
-    credit_chart = create_yearly_line_chart(
-        credit_summary, "credito", title="Crédito Anual por Banco"
-    )
-    debit_chart = create_yearly_line_chart(
-        debit_summary, "debito", title="Débito Anual por Banco"
-    )
+
+credit_summary = get_yearly_summary(data, "credito")
+debit_summary = get_yearly_summary(data, "debito")
+credit_chart = create_yearly_summary_chart(
+    credit_summary, "credito", title="Resumo Anual de Crédito"
+)
+debit_chart = create_yearly_summary_chart(
+    debit_summary, "debito", title="Resumo Anual de Débito"
+)
+
 
 st.subheader("Gráficos de Crédito e Débito")
 col4, col5 = st.columns(2)
