@@ -344,8 +344,16 @@ def analyze_supplier_profitability(data):
         Rentabilidade=('Impacto', 'sum')
     ).reset_index()
     
+    # Calcular a rentabilidade como percentual que a marca representa do total das marcas
+    profitability['Percentual'] = (profitability['Rentabilidade'] / profitability['Rentabilidade'].sum()) * 100
+    #formartar com o valor em porcentagem com duas casas decimais
+    profitability['Percentual'] = profitability['Percentual'].map("{:.2f}%".format)
+    
+    
+    
     # Ordenar pela rentabilidade
     profitability = profitability.sort_values(by='Rentabilidade', ascending=False)
+    
     
     return profitability
 
